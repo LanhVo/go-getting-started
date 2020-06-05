@@ -24,11 +24,15 @@ func main() {
 	if err := http.ListenAndServe(":" + port, nil); err != nil {
 		log.Fatalf("Could not start server: %s\n", err.Error())
 	}
-	// Auto Deploy
 }
 
 type ReceiptData struct {
 	Receipt string
+}
+
+type ReceiptValidationResult struct {
+	Result		int
+	Environment	string
 }
 
 
@@ -54,10 +58,13 @@ func verifyAppstoreReceipt(w http.ResponseWriter, r *http.Request) {
 		resp := &appstore.IAPResponse{}
 		ctx := context.Background()
 		error := client.Verify(ctx, req, resp)
+
+		// Return result to client
+		w.Header().Set("Content-Type", "application/json")
 		if error != nil {
-			fmt.Fprintf(w, "Failed = %v\n", error)
+			json.NewEncoder(w).Encode(error)
 		} else {
-			fmt.Fprintf(w, "Success = %v\n", resp)
+			json.NewEncoder(w).Encode(resp)
 		}
 
 	default:
