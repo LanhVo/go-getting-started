@@ -8,14 +8,21 @@ import (
 	_ "github.com/heroku/x/hmetrics/onload"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
 	http.HandleFunc("/appstore", verifyAppstoreReceipt)
 
-	fmt.Printf("Starting server for verify receipt...\n")
-	if err := http.ListenAndServe(":5000", nil); err != nil {
-		log.Fatal(err)
+	port, ok := os.LookupEnv("PORT")
+
+	if !ok {
+		port = "8080"
+	}
+
+	log.Printf("Starting verify receipt server on port %s\n", port)
+	if err := http.ListenAndServe(":" + port, nil); err != nil {
+		log.Fatalf("Could not start server: %s\n", err.Error())
 	}
 }
 
